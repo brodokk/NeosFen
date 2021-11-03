@@ -62,9 +62,6 @@ class Client:
 
     async def login(self, data: LoginDetails) -> None:
         async with ClientSession() as session:
-            print('here')
-            print(data)
-            print(dataclasses.asdict(data))
             async with session.post(CLOUDX_NEOS_API + "/userSessions", json=dataclasses.asdict(data)) as req:
                 try:
                     responce = await req.json()
