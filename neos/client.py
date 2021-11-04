@@ -20,7 +20,6 @@ from .classes import (
     RecordType,
     recordTypeMapping,
     OnlineStatus,
-    onlineStatusMapping,
     CurrentSessionAccessLevel,
 )
 from .endpoints import CLOUDX_NEOS_API

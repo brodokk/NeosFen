@@ -169,6 +169,13 @@ class OnlineStatus(Enum):
     BUSY = "Busy"
     OFFLINE = "Offline"
 
+onlineStatusMapping = {
+    OnlineStatus.ONLINE: "Online",
+    OnlineStatus.AWAY: "Away",
+    OnlineStatus.BUSY: "Busy",
+    OnlineStatus.OFFLINE: "Offline",
+}
+
 
 class CurrentSessionAccessLevel(Enum):
     PRIVATE = 0
@@ -200,14 +207,6 @@ class UserStatusData:
     neosVersion: Optional[str]
     publicRSAKey: Optional[dict]  # investigate usefulness
     latestMessageTime: Optional[datetime]
-
-
-onlineStatusMapping = {
-    OnlineStatus.ONLINE: "Online",
-    OnlineStatus.AWAY: "Away",
-    OnlineStatus.BUSY: "Busy",
-    OnlineStatus.OFFLINE: "Offline",
-}
 
 
 @dataclass
