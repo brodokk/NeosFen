@@ -153,10 +153,10 @@ class UserStatusData:
     currentSessionAccessLevel: int  # TODO: Find Enum Values
     currentSessionHidden: bool
     currentHosting: bool
-    compatibilityHash: str
-    neosVersion: str
+    # compatibilityHash: str
+    # neosVersion: str
     # publicRSAKey: dict  investigate usefulness
-    latestMessageTime: datetime
+    # latestMessageTime: datetime
 
 
 @dataclass
@@ -166,5 +166,5 @@ class NeosFriend:
     friendStatus: str  # TODO: find enum values
     isAccepted: bool
     userStatus: UserStatusData
-    profile: ProfileData
+    # profile: ProfileData
     latestMessageTime: datetime

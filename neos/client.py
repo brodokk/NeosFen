@@ -62,6 +62,7 @@ class Client:
 
     async def login(self, data: LoginDetails) -> None:
         async with ClientSession() as session:
+            print(dataclasses.asdict(data))
             async with session.post(CLOUDX_NEOS_API + "/userSessions", json=dataclasses.asdict(data)) as req:
                 try:
                     responce = await req.json()
@@ -113,6 +114,18 @@ class Client:
                     raise ValueError(responce["message"])
                 req.raise_for_status()
                 return dacite.from_dict(NeosUser, await req.json(), DACITE_CONFIG)
+
+    def _getFriends(self):
+        with ClientSession(headers=self.headers) as session:
+            with session.get(f"{CLOUDX_NEOS_API}/users/{self.userId}/friends") as req:
+                responce = req.json()
+                if "message" in responce:
+                    raise ValueError(responce["message"])
+                req.raise_for_status()
+                print(responce)
+                return [dacite.from_dict(NeosFriend, user, DACITE_CONFIG) for user in responce]
+
+
 
     async def getFriends(self):
         """
