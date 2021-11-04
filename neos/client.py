@@ -21,12 +21,13 @@ from .classes import (
     recordTypeMapping,
     OnlineStatus,
     onlineStatusMapping,
+    CurrentSessionAccessLevel,
 )
 from .endpoints import CLOUDX_NEOS_API
 from neos import exceptions as neos_exceptions
 
 DACITE_CONFIG = dacite.Config(
-    cast=[RecordType, OnlineStatus],
+    cast=[RecordType, OnlineStatus, CurrentSessionAccessLevel],
     type_hooks={
         datetime: isoparse,
         ParseResult: urlparse,

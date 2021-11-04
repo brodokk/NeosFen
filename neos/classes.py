@@ -170,11 +170,30 @@ class OnlineStatus(Enum):
     OFFLINE = "Offline"
 
 
+class CurrentSessionAccessLevel(Enum):
+    PRIVATE = 0
+    LAN = 1
+    FRIENDS = 2
+    FRIENDSOFFRIENDS = 3
+    REGISTEREDUSERS = 4
+    ANYONE = 5
+
+
+currentSessionAccessLevelMapping = {
+    CurrentSessionAccessLevel.PRIVATE: 0,
+    CurrentSessionAccessLevel.LAN: 1,
+    CurrentSessionAccessLevel.FRIENDS: 2,
+    CurrentSessionAccessLevel.FRIENDSOFFRIENDS: 3,
+    CurrentSessionAccessLevel.REGISTEREDUSERS: 4,
+    CurrentSessionAccessLevel.ANYONE: 5,
+}
+
+
 @dataclass
 class UserStatusData:
     onlineStatus: OnlineStatus
     lastStatusChange: datetime
-    currentSessionAccessLevel: int  # TODO: Find Enum Values
+    currentSessionAccessLevel: CurrentSessionAccessLevel
     currentSessionHidden: bool
     currentHosting: bool
     compatibilityHash: Optional[str]
