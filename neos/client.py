@@ -6,7 +6,7 @@ from typing import Dict, List
 from urllib.parse import ParseResult, urlparse
 
 import dacite
-from aiohttp import ClientSession, ContentTypeError
+from requests import Session
 from dateutil.parser import isoparse
 
 from . import __version__
@@ -21,8 +21,7 @@ from .classes import (
     typeMapping,
 )
 from .endpoints import CLOUDX_NEOS_API
-from .exceptions import NoTokenError
-from neos import exceptions
+from neos import exceptions as neos_exceptions
 
 DACITE_CONFIG = dacite.Config(
     cast=[RecordType],
@@ -41,6 +40,8 @@ class Client:
     token: str = None
     expirey: datetime = None
     secretMachineId: str = None
+    session: Session = Session()
+
 
     @property
     def headers(self) -> dict:
@@ -55,26 +56,39 @@ class Client:
     def processRecordList(data: List[dict]):
         ret = []
         for raw_item in data:
+            #print(raw_item)
             item = dacite.from_dict(NeosRecord, raw_item, DACITE_CONFIG)
             x = dacite.from_dict(typeMapping[item.recordType], raw_item, DACITE_CONFIG)
             ret.append(x)
         return ret
 
-    async def login(self, data: LoginDetails) -> None:
-        async with ClientSession() as session:
-            print(dataclasses.asdict(data))
-            async with session.post(CLOUDX_NEOS_API + "/userSessions", json=dataclasses.asdict(data)) as req:
-                try:
-                    responce = await req.json()
-                except ContentTypeError:
-                    raise ValueError(await req.text())
-                if "message" in responce:
-                    raise ValueError(responce["message"])
-                req.raise_for_status()
-                self.userId = responce["userId"]
-                self.token = responce["token"]
-                self.secretMachineId = responce["secretMachineId"]
-                self.expirey = isoparse(responce["expire"])
+    def _request(
+            self, verb: str, path: str, data: dict = None, json: dict = None
+        ) -> Dict:
+        args = {'url': CLOUDX_NEOS_API + path}
+        if data: args['data'] = data
+        if json: args['json'] = json
+        func = getattr(self.session, verb, None)
+        with func(**args) as req:
+            print("[{}] {}".format(req.status_code, args))
+            if req.status_code != 200:
+                if "Invalid credentials" in req.text:
+                    raise neos_exceptions.InvalidCredentials(req.text)
+                else:
+                    raise neos_exceptions.NeosAPIException(req.status_code, req.text)
+            responce = req.json()
+            if "message" in responce:
+                raise neos_exceptions.NeosAPIException(responce["message"])
+            return responce
+
+    def login(self, data: LoginDetails) -> None:
+        responce = self._request('post', "/userSessions",
+            json=dataclasses.asdict(data))
+        self.userId = responce["userId"]
+        self.token = responce["token"]
+        self.secretMachineId = responce["secretMachineId"]
+        self.expirey = isoparse(responce["expire"])
+        self.session.headers.update(self.headers)
 
     def loadToken(self):
         if OSpath.exists(AUTHFILE_NAME):
@@ -87,10 +101,11 @@ class Client:
                     self.userId = session["userId"]
                     self.expirey = expirey
                     self.secretMachineId = session["secretMachineId"]
+                    self.session.headers.update(self.headers)
                 else:
-                    raise NoTokenError
+                    raise neos_exceptions.NoTokenError
         else:
-            raise NoTokenError
+            raise neos_exceptions.NoTokenError
 
     def saveToken(self):
         with open(AUTHFILE_NAME, "w+") as f:
@@ -104,80 +119,50 @@ class Client:
                 f,
             )
 
-    async def getUserData(self, user: str = None) -> NeosUser:
+    def getUserData(self, user: str = None) -> NeosUser:
         if user is None:
             user = self.userId
-        async with ClientSession(headers=self.headers) as session:
-            async with session.get(CLOUDX_NEOS_API + "/users/" + user) as req:
-                responce = await req.json()
-                if "message" in responce:
-                    raise ValueError(responce["message"])
-                req.raise_for_status()
-                return dacite.from_dict(NeosUser, await req.json(), DACITE_CONFIG)
+            responce = self._request('get', "/users/" + user)
+            return dacite.from_dict(NeosUser, responce, DACITE_CONFIG)
 
-    def _getFriends(self):
-        with ClientSession(headers=self.headers) as session:
-            with session.get(f"{CLOUDX_NEOS_API}/users/{self.userId}/friends") as req:
-                responce = req.json()
-                if "message" in responce:
-                    raise ValueError(responce["message"])
-                req.raise_for_status()
-                print(responce)
-                return [dacite.from_dict(NeosFriend, user, DACITE_CONFIG) for user in responce]
-
-
-
-    async def getFriends(self):
+    def getFriends(self):
         """
         returns the friends you have.
 
         Note: does not create friends out of thin air. you need to do that yourself.
         """
-        async with ClientSession(headers=self.headers) as session:
-            async with session.get(f"{CLOUDX_NEOS_API}/users/{self.userId}/friends") as req:
-                responce = await req.json()
-                if "message" in responce:
-                    raise ValueError(responce["message"])
-                req.raise_for_status()
-                print(responce)
-                return [dacite.from_dict(NeosFriend, user, DACITE_CONFIG) for user in responce]
+        responce = self._request('get', f"/users/{self.userId}/friends")
+        return [dacite.from_dict(NeosFriend, user, DACITE_CONFIG) for user in responce]
 
-    async def getInventory(self) -> List[NeosRecord]:
+    def getInventory(self) -> List[NeosRecord]:
         """
         The typical entrypoint to the inventory system.
         """
-        async with ClientSession(headers=self.headers) as session:
-            async with session.get(
-                f"{CLOUDX_NEOS_API}/users/{self.userId}/records",
-                params={"path": "Inventory"},
-            ) as req:
-                req.raise_for_status()
-                return self.processRecordList(await req.json())
+        responce = self._request(
+            'get',
+            f"/users/{self.userId}/records",
+            data={"path": "Inventory"},
+        )
+        return self.processRecordList(responce)
 
-    async def getDirectory(self, directory: NeosDirectory) -> List[NeosRecord]:
+    def getDirectory(self, directory: NeosDirectory) -> List[NeosRecord]:
         """
         given a directory, return it's contents.
         """
-        async with ClientSession(headers=self.headers) as session:
-            async with session.get(
-                f"{CLOUDX_NEOS_API}/users/{directory.ownerId}/records",
-                params={"path": directory.content_path},
-            ) as req:
-                req.raise_for_status()
-                return self.processRecordList(await req.json())
+        responce = self._request(
+            'get',
+            f"/users/{directory.ownerId}/records",
+            data={"path": directory.content_path},
+        )
+        return self.processRecordList(responce)
 
-    async def resolveLink(self, link: NeosLink) -> NeosDirectory:
+    def resolveLink(self, link: NeosLink) -> NeosDirectory:
         """
         given a link type record, will return it's directory. directoy can be passed to getDirectory
         """
-        async with ClientSession(headers=self.headers) as session:
-            _, user, record = link.assetUri.path.split("/")  # TODO: better
-            async with session.get(
-                f"{CLOUDX_NEOS_API}/users/{user}/records/{record}",
-            ) as req:
-                try:
-                    req.raise_for_status()
-                except Exception as e:
-                    raise exceptions.FolderNotFound(**e)
-
-                return dacite.from_dict(NeosDirectory, await req.json(), DACITE_CONFIG)
+        _, user, record = link.assetUri.path.split("/")  # TODO: better
+        responce = self._request(
+            'get',
+            f"/users/{user}/records/{record}",
+        )
+        return dacite.from_dict(NeosDirectory, responce, DACITE_CONFIG)
