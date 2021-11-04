@@ -169,6 +169,7 @@ class OnlineStatus(Enum):
     BUSY = "Busy"
     OFFLINE = "Offline"
 
+
 onlineStatusMapping = {
     OnlineStatus.ONLINE: "Online",
     OnlineStatus.AWAY: "Away",
