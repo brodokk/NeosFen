@@ -210,11 +210,24 @@ class UserStatusData:
     latestMessageTime: Optional[datetime]
 
 
+class FriendStatus(Enum):
+    ACCEPTED = "Accepted"
+    IGNORED = "Ignored"
+    NONE = "None"
+
+
+friendStatusMapping = {
+    FriendStatus.ACCEPTED: "Accepted",
+    FriendStatus.IGNORED: "Ignored",
+    FriendStatus.NONE: "None",
+}
+
+
 @dataclass
 class NeosFriend:
     id: str
     friendUsername: str
-    friendStatus: str  # TODO: find enum values
+    friendStatus: FriendStatus
     isAccepted: bool
     userStatus: UserStatusData
     profile: Optional[ProfileData]
