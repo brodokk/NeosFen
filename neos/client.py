@@ -18,13 +18,15 @@ from .classes import (
     NeosRecord,
     NeosUser,
     RecordType,
-    typeMapping,
+    recordTypeMapping,
+    OnlineStatus,
+    onlineStatusMapping,
 )
 from .endpoints import CLOUDX_NEOS_API
 from neos import exceptions as neos_exceptions
 
 DACITE_CONFIG = dacite.Config(
-    cast=[RecordType],
+    cast=[RecordType, OnlineStatus],
     type_hooks={
         datetime: isoparse,
         ParseResult: urlparse,
@@ -57,7 +59,7 @@ class Client:
         ret = []
         for raw_item in data:
             item = dacite.from_dict(NeosRecord, raw_item, DACITE_CONFIG)
-            x = dacite.from_dict(typeMapping[item.recordType], raw_item, DACITE_CONFIG)
+            x = dacite.from_dict(recordTypeMapping[item.recordType], raw_item, DACITE_CONFIG)
             ret.append(x)
         return ret
 

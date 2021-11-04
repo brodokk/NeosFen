@@ -76,7 +76,7 @@ class NeosAudio(NeosRecord):
     pass
 
 
-typeMapping = {
+recordTypeMapping = {
     RecordType.DIRECTORY: NeosDirectory,
     RecordType.LINK: NeosLink,
     RecordType.OBJECT: NeosObject,
@@ -164,9 +164,16 @@ class NeosUser:
     tags: Optional[List[str]] = field(default_factory=list)
 
 
+class OnlineStatus(Enum):
+    ONLINE = "Online"
+    AWAY = "Away"
+    BUSY = "Busy"
+    OFFLINE = "Offline"
+
+
 @dataclass
 class UserStatusData:
-    onlineStatus: str  # TODO: find enum values
+    onlineStatus: OnlineStatus
     lastStatusChange: datetime
     currentSessionAccessLevel: int  # TODO: Find Enum Values
     currentSessionHidden: bool
@@ -175,6 +182,14 @@ class UserStatusData:
     neosVersion: Optional[str]
     publicRSAKey: Optional[dict]  # investigate usefulness
     latestMessageTime: Optional[datetime]
+
+
+onlineStatusMapping = {
+    OnlineStatus.ONLINE: "Online",
+    OnlineStatus.AWAY: "Away",
+    OnlineStatus.BUSY: "Busy",
+    OnlineStatus.OFFLINE: "Offline",
+}
 
 
 @dataclass
