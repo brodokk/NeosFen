@@ -14,6 +14,9 @@ class RecordType(Enum):
     OBJECT = "object"
     LINK = "link"
     DIRECTORY = "directory"
+    WORLD = "world"
+    TEXTURE = "texture"
+    AUDIO = "audio"
 
 
 @dataclass
@@ -21,10 +24,10 @@ class NeosRecord:
     id: str
     globalVersion: int
     localVersion: int
-    lastModifyingUserId: str
+    lastModifyingUserId: Optional[str]
     name: str
     recordType: RecordType
-    path: str
+    path: Optional[str]
     isPublic: bool
     isForPatrons: bool
     isListed: bool
@@ -42,7 +45,7 @@ class NeosLink(NeosRecord):
 
 @dataclass
 class NeosDirectory(NeosRecord):
-    lastModifyingMachineId: str
+    lastModifyingMachineId: Optional[str]
     ownerName: str
     tags: List[str]
     creationTime: Optional[datetime]
@@ -60,11 +63,26 @@ class NeosObject(NeosRecord):
     tags: List[str]
     creationTime: datetime
 
+@dataclass
+class NeosWorld(NeosRecord):
+    pass
+
+@dataclass
+class NeosTexture(NeosRecord):
+    pass
+
+@dataclass
+class NeosAudio(NeosRecord):
+    pass
+
 
 typeMapping = {
     RecordType.DIRECTORY: NeosDirectory,
     RecordType.LINK: NeosLink,
     RecordType.OBJECT: NeosObject,
+    RecordType.WORLD: NeosWorld,
+    RecordType.TEXTURE: NeosTexture,
+    RecordType.AUDIO: NeosAudio,
 }
 
 
@@ -107,7 +125,7 @@ class PatreonData:
     patreonId: Optional[str]
     lastPatreonPledgeCents: int
     lastTotalCents: int
-    lastTotalUnits: int
+    #lastTotalUnits: int
     minimumTotalUnits: int
     externalCents: int
     lastExternalCents: int
@@ -153,10 +171,10 @@ class UserStatusData:
     currentSessionAccessLevel: int  # TODO: Find Enum Values
     currentSessionHidden: bool
     currentHosting: bool
-    compatibilityHash: str
-    neosVersion: str
-    # publicRSAKey: dict  investigate usefulness
-    latestMessageTime: datetime
+    compatibilityHash: Optional[str]
+    neosVersion: Optional[str]
+    publicRSAKey: Optional[dict]  # investigate usefulness
+    latestMessageTime: Optional[datetime]
 
 
 @dataclass
@@ -166,5 +184,5 @@ class NeosFriend:
     friendStatus: str  # TODO: find enum values
     isAccepted: bool
     userStatus: UserStatusData
-    profile: ProfileData
+    profile: Optional[ProfileData]
     latestMessageTime: datetime
