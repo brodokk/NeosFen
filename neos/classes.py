@@ -125,7 +125,6 @@ class PatreonData:
     patreonId: Optional[str]
     lastPatreonPledgeCents: int
     lastTotalCents: int
-    #lastTotalUnits: int
     minimumTotalUnits: int
     externalCents: int
     lastExternalCents: int
