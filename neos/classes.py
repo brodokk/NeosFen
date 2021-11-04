@@ -162,6 +162,52 @@ class NeosUser:
     patreonData: Optional[PatreonData]
     tags: Optional[List[str]] = field(default_factory=list)
 
+@dataclass
+class WorldId:
+    ownerId: str
+    recordId: str
+
+@dataclass
+class SessionUser:
+    isPresent: bool
+    userID: str
+    username: str
+
+@dataclass
+class Session:
+    activeSessions: Optional[str]
+    activeUsers: int
+    compatibilityHash: str
+    correspondingWorldId: Optional[WorldId]
+    description: str
+    hasEnded: bool
+    headlessHost: bool
+    hostMachineId: str
+    hostUserId: str
+    hostUsername: str
+    isValid: bool
+    joinedUsers: int
+    lastUpdate: datetime
+    maxUsers: int
+    mobileFriendly: bool
+    name: str
+    neosVersion: str
+    normalizedSessionId: str
+    sessionBeginTime: datetime
+    sessionId: str
+    sessionURLs: List[str]
+    sessionUsers: List[SessionUser]
+    tags: List[str]
+    thumbnail: str
+    totalActiveUsers: int
+    totalJoinedUsers: int
+
+
+@dataclass
+class PublicRSAKey:
+    Exponent: str
+    Modulus: str
+
 
 class OnlineStatus(Enum):
     ONLINE = "Online"
@@ -199,15 +245,19 @@ currentSessionAccessLevelMapping = {
 
 @dataclass
 class UserStatusData:
-    onlineStatus: OnlineStatus
-    lastStatusChange: datetime
+    activeSessions: Optional[List[Session]]
+    currentSession: Optional[Session]
+    compatibilityHash: Optional[str]
+    currentHosting: bool
     currentSessionAccessLevel: CurrentSessionAccessLevel
     currentSessionHidden: bool
-    currentHosting: bool
-    compatibilityHash: Optional[str]
+    currentSessionId: Optional[str]
+    isMobile: bool
+    lastStatusChange: datetime
     neosVersion: Optional[str]
-    publicRSAKey: Optional[dict]  # investigate usefulness
-    latestMessageTime: Optional[datetime]
+    onlineStatus: OnlineStatus
+    OutputDevice: Optional[str]
+    publicRSAKey: Optional[PublicRSAKey]
 
 
 class FriendStatus(Enum):
