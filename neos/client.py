@@ -131,7 +131,7 @@ class Client:
         return url
 
     def getUserData(self, user: str = None) -> NeosUser:
-        if user is None:
+        if user is not None:
             user = self.userId
             responce = self._request('get', "/users/" + user)
             return dacite.from_dict(NeosUser, responce, DACITE_CONFIG)
