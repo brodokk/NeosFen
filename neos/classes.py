@@ -179,7 +179,7 @@ class Session:
     activeUsers: int
     compatibilityHash: str
     correspondingWorldId: Optional[WorldId]
-    description: str
+    description: Optional[str]
     hasEnded: bool
     headlessHost: bool
     hostMachineId: str
@@ -198,7 +198,7 @@ class Session:
     sessionURLs: List[str]
     sessionUsers: List[SessionUser]
     tags: List[str]
-    thumbnail: str
+    thumbnail: Optional[str]
     totalActiveUsers: int
     totalJoinedUsers: int
 
