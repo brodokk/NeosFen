@@ -122,6 +122,14 @@ class Client:
                 f,
             )
 
+    def neosDBSignature(self, iconUrl: str) -> str:
+        return iconUrl.split("//")[1].split(".")[0]
+
+    def neosDbToHttp(self, iconUrl: str) -> str:
+        url = "https://cloudxstorage.blob.core.windows.net/assets"
+        url = url + self.neosDBSignature(iconUrl)
+        return url
+
     def getUserData(self, user: str = None) -> NeosUser:
         if user is None:
             user = self.userId
