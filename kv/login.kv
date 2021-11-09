@@ -1,0 +1,34 @@
+<LoginScreen>:
+    MDBoxLayout
+        id: login_layout
+        orientation: 'vertical'
+        size_hint: .8, .4
+        pos_hint: {'y': .3, 'x': .1}
+
+        MDLabel:
+            id: error_message
+            color: 1,0,0,1
+            text: ""
+
+        MDTextField:
+            id: login
+            hint_text: "Login"
+            focus: True
+            write_tab: False
+            multiline:False
+            font_size: 28
+
+        MDTextField:
+            id: password
+            hint_text: "Password"
+            write_tab: False
+            multiline:False
+            password:True
+            font_size: 28
+            on_text_validate: root.do_login(login.text, password.text)
+
+        MDRectangleFlatButton:
+            text: 'CONNECTION'
+            font_size: 24
+            md_bg_color: app.theme_cls.primary_light
+            on_press: root.do_login(login.text, password.text)

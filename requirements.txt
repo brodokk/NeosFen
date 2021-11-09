@@ -1,3 +1,10 @@
 requests
 dacite
 python-dateutil
+dacite
+docutils
+Kivy
+Kivy-Garden
+kivymd
+requests
+webcolors

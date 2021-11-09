@@ -1,0 +1,50 @@
+<FriendsListScreen>:
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        MDToolbar:
+            id: connected_toolbar
+            left_action_items: [["arrow-left", lambda x: root.disconnect()]]
+            right_action_items: [["refresh", lambda x: root.refresh()]]
+            type_height: "medium"
+            size_hint_y: None
+            type: "top"
+            title: "brodokk (U-brodokk)"
+
+        LoadingBoxLayout:
+            id: loading_status
+
+            MDLabel:
+                text: "Loading cutie beans data uwu"
+                halign: "center"
+                font_size: 11
+
+        MDBoxLayout:
+            id: headline_box
+            size_hint_y: None
+            height: connected_contacts.texture_size[1]
+            #padding: 0, 0, 0, dp(16)
+            padding: dp(10), 0
+            pos: dp(16), 0
+            md_bg_color: app.theme_cls.primary_color
+
+            MDLabel:
+                id: connected_contacts
+                adaptive_height: True
+                shorten: True
+                shorten_from: "right"
+                theme_text_color: "Custom"
+                halign: "left"
+
+            MDLabel:
+                halign: "right"
+                id: last_refresh
+                adaptive_height: True
+                shorten: True
+                shorten_from: "right"
+                theme_text_color: "Custom"
+
+        ScrollView:
+            MDList:
+                id: friendlist
+
