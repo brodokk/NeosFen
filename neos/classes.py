@@ -170,7 +170,7 @@ class WorldId:
 @dataclass
 class SessionUser:
     isPresent: bool
-    userID: str
+    userID: Optional[str]
     username: str
 
 @dataclass
