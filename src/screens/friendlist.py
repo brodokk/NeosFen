@@ -81,15 +81,21 @@ class FriendsListScreen(MDScreen):
         else:
             raise ValueError('Unknow online status')
         sessionName = "  "
+        sessionInfo = "  "
         if friend.userStatus.onlineStatus != OnlineStatus.OFFLINE:
             sessionName = "In "
             if friend.userStatus.currentSession:
                 sessionName += html2bbcode(
                     friend.userStatus.currentSession.name)
+                sessionInfo = "{} session with {} users".format(
+                    friend.userStatus.currentSessionAccessLevel,
+                    friend.userStatus.currentSession.activeUsers,
+                )
             else:
                 sessionName += "Private world"
 
-        return username, onlineStatus, sessionName
+
+        return username, onlineStatus, sessionName, sessionInfo
 
     def refresh(self):
         if self.runningThread:
@@ -123,7 +129,7 @@ class FriendsListScreen(MDScreen):
                 continue
             self.ids.loading_status.hide_widget()
             try:
-                username, onlineStatus, sessionName = self.get_data(friend)
+                username, onlineStatus, sessionName, sessionInfo = self.get_data(friend)
                 if not app.neosFenFriendsList.friends.contains("id", friend.id):
                     user = app.neosFenClient.getUserData(friend.id)
                     if user.profile:
@@ -143,9 +149,9 @@ class FriendsListScreen(MDScreen):
             except TypeError:
                 continue
             a = CustomThreeLineAvatarListItem(
-                text=username,
-                secondary_text=onlineStatus,
-                tertiary_text=sessionName,
+                text=username + " - " + onlineStatus,
+                secondary_text=sessionName,
+                tertiary_text=sessionInfo,
                 id=friend.id,
             )
             a.add_widget(ImageLeftWidget(

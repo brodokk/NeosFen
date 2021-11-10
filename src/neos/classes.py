@@ -232,6 +232,17 @@ class CurrentSessionAccessLevel(Enum):
     REGISTEREDUSERS = 4
     ANYONE = 5
 
+    def __str__(self):
+        text = {
+            'PRIVATE': 'Private',
+            'LAN': 'LAN',
+            'FRIENDS': 'Contacts',
+            'FRIENDSOFFRIENDS': 'Contacts+',
+            'REGISTEREDUSERS': 'Registered Users',
+            'ANYONE': 'Anyone'
+        }
+        return text[self.name]
+
 
 currentSessionAccessLevelMapping = {
     CurrentSessionAccessLevel.PRIVATE: 0,
