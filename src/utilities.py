@@ -34,13 +34,17 @@ class CollisionsList(list):
         super().append(other)
 
 def html2bbcode(sessionName):
+    #print(sessionName)
     # TODO: make a better translator
     sessionName = sessionName.replace('<br>', '')
     sessionName = re.sub(r'<br>', r'', sessionName)
     m = re.findall('<color=(.*?)>', sessionName)
     if m:
         for color in m:
-            sessionName = re.sub(r'<color=' + color + '>', '[color=' + name_to_hex(color) + ']', sessionName)
+            if not color.startswith('#'):
+                sessionName = re.sub(r'<color=' + color + '>', '[color=' + name_to_hex(color) + ']', sessionName)
+            else:
+                sessionName = re.sub(r'<color=' + color + '>', '[color=' + color + ']', sessionName)
         sessionName = re.sub(r'</color>', r'[/color]', sessionName)
     sessionName = re.sub(r'</b>', r'[/b]', sessionName)
     sessionName = re.sub(r'<b>', r'[b]', sessionName)
