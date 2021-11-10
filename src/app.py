@@ -23,7 +23,7 @@ Window.size = (400, 600)
 Config.set('input', 'mouse', 'mouse,disable_multitouch')
 Config.write()
 
-load_kv_files(pathlib.PurePath('/kv/'))
+load_kv_files(pathlib.Path('kv'))
 
 
 class NeosFenApp(MDApp):

@@ -54,9 +54,8 @@ def load_kv_files(path):
     # Gets current python dir then add the KV dir
     kv_path = pathlib.Path.cwd() / path
     #kv_load_list = [f for f in os.listdir(kv_path) if os.path.isfile(os.path.join(kv_path, f))]
-    kv_load_list = [f for f in kv_path.rglob("**/*") if (kv_path / f).isfile()] 
-
+    kv_load_list = [f for f in kv_path.rglob("**/*") if (kv_path / f).is_file()]
     # Loads all KV file
     for file in kv_load_list:
-        if file.endswith('.kv'):
-            Builder.load_file(kv_path / file)
+        if file.suffix == '.kv':
+            Builder.load_file(str(kv_path / file))
