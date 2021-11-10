@@ -1,4 +1,5 @@
 import os
+import pathlib
 
 from kivy.core.window import Window
 from kivy.config import Config
@@ -22,7 +23,7 @@ Window.size = (400, 600)
 Config.set('input', 'mouse', 'mouse,disable_multitouch')
 Config.write()
 
-load_kv_files('/kv/')
+load_kv_files(pathlib.PurePath('/kv/'))
 
 
 class NeosFenApp(MDApp):
