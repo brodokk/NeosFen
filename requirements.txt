@@ -3,8 +3,8 @@ dacite
 python-dateutil
 dacite
 docutils
-Kivy
-Kivy-Garden
+kivy
+kivy-Garden
 kivymd
 requests
 webcolors
