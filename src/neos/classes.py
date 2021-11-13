@@ -274,12 +274,14 @@ class UserStatusData:
 class FriendStatus(Enum):
     ACCEPTED = "Accepted"
     IGNORED = "Ignored"
+    REQUESTED = "Requested"
     NONE = "None"
 
 
 friendStatusMapping = {
     FriendStatus.ACCEPTED: "Accepted",
     FriendStatus.IGNORED: "Ignored",
+    FriendStatus.REQUESTED: "Requested",
     FriendStatus.NONE: "None",
 }
 
