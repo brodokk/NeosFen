@@ -14,6 +14,7 @@ from utilities import EnhancedJSONEncoder, CollisionsList
 class NeosFenLogin:
     userId: str
     expire: str
+    lastUpdate: datetime
     token: str
     secretMachineId: str
 
@@ -60,34 +61,55 @@ class NeosFenLogins:
             app.root.current_screen.ids['error_message'].text = str(e)
             return False
 
-        self.logins.append(
-            NeosFenLogin(
-                app.neosFenClient.userId,
-                app.neosFenClient.expirey.isoformat(),
-                app.neosFenClient.token,
-                app.neosFenClient.secretMachineId,
-            ),
-            "userId",
+        neosFenLogin = NeosFenLogin(
+            app.neosFenClient.userId,
+            app.neosFenClient.expire.isoformat(),
+            app.neosFenClient.lastUpdate,
+            app.neosFenClient.token,
+            app.neosFenClient.secretMachineId,
         )
+
+        try:
+            self.logins.append(neosFenLogin, "userId")
+        except ValueError:
+            self.logins.update("userId", neosFenLogin.userId, "token", neosFenLogin.token)
+
         self._write_config()
         return True
+
+    def logout(self):
+        app = MDApp.get_running_app()
+        print(self.logins)
+        self.logins.update("userId", self.neosFenConnectedUser["userId"], "token", "")
+        print(self.logins)
+        self._write_config()
+        app.root.current = 'loginscreen'
 
     def load_config(self):
         app = MDApp.get_running_app()
         data = self._read_config()
         if data:
-            self.neosConnectedUser = data[0]
             session = data[0]
-            app.neosFenClient.expirey = datetime.fromisoformat(session["expire"])
-            if datetime.now().timestamp() < app.neosFenClient.expirey.timestamp():
-                print("reading token from disk")
-                app.neosFenClient.token = session["token"]
-                app.neosFenClient.userId = session["userId"]
-                app.neosFenClient.expirey = app.neosFenClient.expirey
-                app.neosFenClient.secretMachineId = session["secretMachineId"]
-                app.neosFenClient.session.headers.update(app.neosFenClient.headers)
-            else:
-                raise neos_exceptions.NoTokenError
+            self.logins.append(
+                NeosFenLogin(
+                    session["userId"],
+                    datetime.fromisoformat(session["expire"]),
+                    datetime.fromisoformat(session["lastUpdate"]),
+                    session["token"],
+                    session["secretMachineId"],
+                ),
+                "userId",
+            )
+            if not session["token"]:
+                return False
+            self.neosFenConnectedUser = session
+            print("reading token from disk")
+            app.neosFenClient.lastUpdate = datetime.fromisoformat(session["lastUpdate"])
+            app.neosFenClient.token = session["token"]
+            app.neosFenClient.userId = session["userId"]
+            app.neosFenClient.expire = app.neosFenClient.expire
+            app.neosFenClient.secretMachineId = session["secretMachineId"]
+            app.neosFenClient.session.headers.update(app.neosFenClient.headers)
             return True
         return False
 

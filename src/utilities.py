@@ -3,6 +3,7 @@ import re
 import json
 import dataclasses
 import pathlib
+from datetime import datetime
 
 from webcolors import name_to_hex
 
@@ -11,7 +12,11 @@ from kivy.lang import Builder
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, o):
         if dataclasses.is_dataclass(o):
-            return dataclasses.asdict(o)
+            data = dataclasses.asdict(o)
+            for key, value in data.items():
+                if type(value) == datetime:
+                    data[key] = value.isoformat()
+            return data
         return super().default(o)
 
 class CollisionsList(list):
@@ -20,6 +25,13 @@ class CollisionsList(list):
             if getattr(login, field) == value:
                 return login
         return None
+
+    def update(self, search_field, search_value, field, value):
+        for i in range(len(self)):
+            if getattr(self[i], search_field) == search_value:
+                setattr(self[i], field, value)
+                return True
+        raise ValueError('--> No value {0} found for field {1}'.format(search_value, search_field))
 
     def contains(self, field, value):
         for login in self:
@@ -34,7 +46,6 @@ class CollisionsList(list):
         super().append(other)
 
 def html2bbcode(sessionName):
-    #print(sessionName)
     # TODO: make a better translator
     sessionName = sessionName.replace('<br>', '')
     sessionName = re.sub(r'<br>', r'', sessionName)

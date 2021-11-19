@@ -8,6 +8,7 @@ from kivy.uix.screenmanager import SlideTransition
 from kivymd.uix.screen import MDScreen
 
 from neos.classes import OnlineStatus
+from neos.exceptions import NeosAPIException
 from kivy.uix.button import Button
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -118,7 +119,13 @@ class FriendsListScreen(MDScreen):
 
     def _build_list(self):
         app = MDApp.get_running_app()
-        friends = app.neosFenClient.getFriends()
+        try:
+            friends = app.neosFenClient.getFriends()
+        except NeosAPIException:
+            app.neosFenLogins.logout()
+            self.runningThread = False
+            self.stopThread = False
+            return
         current_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         self.ids.last_refresh.text = f"{current_time}"
         self.ids.connected_contacts.text = f"0 on {len(friends)} online"

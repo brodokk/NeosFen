@@ -41,7 +41,9 @@ AUTHFILE_NAME = "auth.token"
 class Client:
     userId: str = None
     token: str = None
-    expirey: datetime = None
+    expire: datetime = None
+    rememberMe: bool = False
+    lastUpdate: datetime = None
     secretMachineId: str = None
     session: Session = Session()
 
@@ -65,8 +67,16 @@ class Client:
         return ret
 
     def _request(
-            self, verb: str, path: str, data: dict = None, json: dict = None, params: dict = None
+            self, verb: str, path: str, data: dict = None, json: dict = None,
+            params: dict = None, ignoreUpdate: bool = False
         ) -> Dict:
+        if self.lastUpdate and not ignoreUpdate:
+            lastUpdate = self.lastUpdate
+            print((datetime.now() - lastUpdate).total_seconds())
+            # implement for on week 3555555:
+            if (datetime.now() - lastUpdate).total_seconds() >= 86000:
+                print('update time')
+                self._request('patch', '/userSessions', ignoreUpdate=True)
         args = {'url': CLOUDX_NEOS_API + path}
         if data: args['data'] = data
         if json: args['json'] = json
@@ -90,19 +100,20 @@ class Client:
         self.userId = responce["userId"]
         self.token = responce["token"]
         self.secretMachineId = responce["secretMachineId"]
-        self.expirey = isoparse(responce["expire"])
+        self.expire = isoparse(responce["expire"])
+        self.lastUpdate = datetime.now()
         self.session.headers.update(self.headers)
 
     def loadToken(self):
         if OSpath.exists(AUTHFILE_NAME):
             with open(AUTHFILE_NAME, "r") as f:
                 session = json.load(f)
-                expirey = datetime.fromisoformat(session["expire"])
-                if datetime.now().timestamp() < expirey.timestamp():
+                expire = datetime.fromisoformat(session["expire"])
+                if datetime.now().timestamp() < expire.timestamp():
                     print("reading token from disk")
                     self.token = session["token"]
                     self.userId = session["userId"]
-                    self.expirey = expirey
+                    self.expire = expire
                     self.secretMachineId = session["secretMachineId"]
                     self.session.headers.update(self.headers)
                 else:
@@ -115,7 +126,7 @@ class Client:
             json.dump(
                 {
                     "userId": self.userId,
-                    "expire": self.expirey.isoformat(),
+                    "expire": self.expire.isoformat(),
                     "token": self.token,
                     "secretMachineId": self.secretMachineId,
                 },

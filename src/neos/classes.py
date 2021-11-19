@@ -97,6 +97,7 @@ class LoginDetails:
     email: Optional[str] = None
     password: Optional[str] = None
     secretMachineId: str = field(default_factory=generate)
+    rememberMe: Optional[str] = False
 
     def __post_init__(self):
         if not self.ownerId and not self.username and not self.email:
