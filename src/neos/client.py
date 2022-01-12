@@ -133,8 +133,8 @@ class Client:
                 f,
             )
 
-    def neosDBSignature(self, iconUrl: str) -> str:
-        return iconUrl.split("//")[1].split(".")[0]
+    def neosDBSignature(self, url: str) -> str:
+        return url.split("//")[1].split(".")[0]
 
     def neosDbToHttp(self, iconUrl: str) -> str:
         url = "https://assets.neos.com/assets"
