@@ -112,6 +112,8 @@ class FriendsListScreen(MDScreen):
 
     def on_pre_enter(self):
         self.ids.loading_status.hide_widget(False)
+        app = MDApp.get_running_app()
+        self.ids.connected_toolbar.title = app.neosFenLogins.logins[0].userId.strip('U-') + " (" + app.neosFenLogins.logins[0].userId + ")"
 
     def on_enter(self):
         self.build_list()
