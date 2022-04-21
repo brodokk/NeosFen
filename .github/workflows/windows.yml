@@ -2,8 +2,8 @@ name: PyInstaller
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - "v*.*.*"
 
 jobs:
   build:
@@ -17,7 +17,8 @@ jobs:
       with:
         path: .
 
-    - uses: actions/upload-artifact@v2
+  - name: Release
+    - uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
-        name: name-of-artifact
-        path: dist/windows
+        files: dist/windows/neosfen.ex
