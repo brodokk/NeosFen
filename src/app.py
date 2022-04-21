@@ -1,8 +1,10 @@
 import os
+import sys
 import pathlib
 
 from kivy.core.window import Window
 from kivy.config import Config
+from kivy.resources import resource_add_path
 from kivy.properties import StringProperty
 from kivy.uix.widget import Widget
 from kivy.uix.screenmanager import ScreenManager
@@ -66,4 +68,6 @@ class NeosFenApp(MDApp):
         )
 
 if __name__ == '__main__':
+    if hasattr(sys, '_MEIPASS'):
+        resource_add_path(os.path.join(sys._MEIPASS))
     NeosFenApp().run()
