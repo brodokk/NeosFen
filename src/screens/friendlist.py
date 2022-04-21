@@ -1,6 +1,7 @@
 import os
 import threading
 import requests
+from functools import partial
 from time import sleep
 from kivy.app import App
 from kivymd.app import MDApp
@@ -14,6 +15,7 @@ from kivymd.uix.button import MDIconButton
 from kivymd.uix.boxlayout import MDBoxLayout
 
 from kivy.graphics import Color, RoundedRectangle
+from kivy.clock import Clock
 
 from kivymd.uix.list import ImageLeftWidget, ThreeLineAvatarListItem, IconLeftWidget, MDList
 
@@ -112,6 +114,21 @@ class FriendsListScreen(MDScreen):
     def on_enter(self):
         self.build_list()
 
+    def update_friendslist(
+        self, username, onlineStatus, sessionName, sessionInfo, friend, icon, *args
+    ):
+        list_item = CustomThreeLineAvatarListItem(
+            text=username + " - " + onlineStatus,
+            secondary_text=sessionName,
+            tertiary_text=sessionInfo,
+            id=friend.id,
+        )
+        list_item.add_widget(ImageLeftWidget(
+            source = icon,
+            radius = [25]
+        ))
+        self.ids.friendlist.add_widget(list_item)
+
     def build_list(self):
         self.runningThread = True
         updateThread = threading.Thread(target=self._build_list)
@@ -134,7 +151,7 @@ class FriendsListScreen(MDScreen):
         for friend in friends:
             if self.stopThread:
                 continue
-            self.ids.loading_status.hide_widget()
+            Clock.schedule_once(partial(self.ids.loading_status.hide_widget))
             try:
                 username, onlineStatus, sessionName, sessionInfo = self.get_data(friend)
                 if not app.neosFenFriendsList.friends.contains("id", friend.id):
@@ -155,19 +172,7 @@ class FriendsListScreen(MDScreen):
                 self.ids.connected_contacts.text = f"{online} on {len(friends)} online"
             except TypeError:
                 continue
-            a = CustomThreeLineAvatarListItem(
-                text=username + " - " + onlineStatus,
-                secondary_text=sessionName,
-                tertiary_text=sessionInfo,
-                id=friend.id,
-            )
-            a.add_widget(ImageLeftWidget(
-                source = icon,
-                radius = [25]
-            ))
-            self.ids.friendlist.add_widget(
-                a
-            )
+            Clock.schedule_once(partial(self.update_friendslist, username, onlineStatus, sessionName, sessionInfo, friend, icon))
         self.ids.connected_contacts.text = f"{online} on {len(friends)} online"
         if self.stopThread:
             self.ids.connected_contacts.text = f"0 on 0 online"

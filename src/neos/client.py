@@ -72,10 +72,10 @@ class Client:
         ) -> Dict:
         if self.lastUpdate and not ignoreUpdate:
             lastUpdate = self.lastUpdate
-            print((datetime.now() - lastUpdate).total_seconds())
+            #print((datetime.now() - lastUpdate).total_seconds())
             # implement for on week 3555555:
             if (datetime.now() - lastUpdate).total_seconds() >= 86000:
-                print('update time')
+                #print('update time')
                 self._request('patch', '/userSessions', ignoreUpdate=True)
         args = {'url': CLOUDX_NEOS_API + path}
         if data: args['data'] = data
@@ -83,7 +83,7 @@ class Client:
         if params: args['params'] = params
         func = getattr(self.session, verb, None)
         with func(**args) as req:
-            print("[{}] {}".format(req.status_code, args))
+            #print("[{}] {}".format(req.status_code, args))
             if req.status_code != 200:
                 if "Invalid credentials" in req.text:
                     raise neos_exceptions.InvalidCredentials(req.text)
