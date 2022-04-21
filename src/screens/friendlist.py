@@ -1,6 +1,8 @@
 import os
+import sys
 import threading
 import requests
+import pathlib
 from functools import partial
 from time import sleep
 from kivy.app import App
@@ -159,7 +161,7 @@ class FriendsListScreen(MDScreen):
                     if user.profile:
                         icon = app.neosFenClient.neosDbToHttp(user.profile.iconUrl)
                     else:
-                        icon = app.installed_path + "/ressources/imgs/default_icon.png"
+                        icon = sys._MEIPASS + "/src/ressources/imgs/default_icon.png" if hasattr(sys, '_MEIPASS') else str(pathlib.Path.cwd() / "src/ressources/imgs/default_icon.png")
                     app.neosFenFriendsList.friends.append(
                         NeosFenFriend(user.id, icon),
                         "id",
@@ -167,7 +169,7 @@ class FriendsListScreen(MDScreen):
                 else:
                     icon = app.neosFenFriendsList.friends.get("id", friend.id).icon
                     if not icon:
-                        icon = app.installed_path + "/Untitled-1.png"
+                        icon = sys._MEIPASS + "/Untitled-1.png" if hasattr(sys, '_MEIPASS') else str(pathlib.Path.cwd() / "Untitled-1.png")
                 online += 1
                 self.ids.connected_contacts.text = f"{online} on {len(friends)} online"
             except TypeError:

@@ -64,10 +64,7 @@ def html2bbcode(sessionName):
 
 def load_kv_files(path):
     # Gets current python dir then add the KV dir
-    if hasattr(sys, '_MEIPASS'):
-        kv_path = sys._MEIPASS / path
-    else:
-        kv_path = pathlib.Path.cwd() / path
+    kv_path = sys._MEIPASS / path if hasattr(sys, '_MEIPASS') else  pathlib.Path.cwd() / path
     kv_load_list = [f for f in kv_path.rglob("**/*") if (kv_path / f).is_file()]
     # Loads all KV file
     for file in kv_load_list:
