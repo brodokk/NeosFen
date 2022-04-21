@@ -42,6 +42,9 @@ class NeosFenLogins:
         else:
             return {}
 
+    def clean_config(self, *args):
+        keyring.delete_password(self.namespace, "user_id")
+
     def do_login(self, login, password):
         app = MDApp.get_running_app()
 

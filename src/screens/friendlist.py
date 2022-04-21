@@ -107,7 +107,7 @@ class FriendsListScreen(MDScreen):
             self.stopThread = True
             while self.runningThread:
                 sleep(1)
-        self.ids.friendlist.clear_widgets()
+        self.clear_widgets()
         self.build_list()
 
     def on_pre_enter(self):
@@ -180,12 +180,15 @@ class FriendsListScreen(MDScreen):
         self.ids.connected_contacts.text = f"{online} on {len(friends)} online"
         if self.stopThread:
             self.ids.connected_contacts.text = f"0 on 0 online"
-            self.ids.friendlist.clear_widgets()
+            self.clear_widgets()
         self.runningThread = False
         self.stopThread = False
 
     def on_leave(self):
         print("bye")
+
+    def clear_widgets(self, *args):
+        self.ids.friendlist.clear_widgets()
 
     def disconnect(self):
         app = MDApp.get_running_app()
@@ -193,8 +196,8 @@ class FriendsListScreen(MDScreen):
             self.stopThread = True
             while self.runningThread:
                 sleep(1)
-        self.ids.friendlist.clear_widgets()
+        Clock.schedule_once(partial(self.clear_widgets))
         self.manager.transition = SlideTransition(direction="right")
-        app.neosFenLogins.clean_config()
+        Clock.schedule_once(partial(app.neosFenLogins.clean_config))
         self.manager.current = 'loginscreen'
         self.manager.get_screen('loginscreen').resetForm()
