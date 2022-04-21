@@ -1,5 +1,8 @@
 import json
+import sys
 import os
+import pathlib
+import base64
 from datetime import datetime
 from dataclasses import dataclass
 
@@ -9,6 +12,9 @@ from neos import exceptions as neos_exceptions
 from neos.classes import LoginDetails as NeosLoginDetails
 
 from utilities import EnhancedJSONEncoder, CollisionsList
+
+import keyring
+import keyring.util.platform_ as keyring_platform
 
 @dataclass
 class NeosFenLogin:
@@ -21,27 +27,23 @@ class NeosFenLogin:
 @dataclass
 class NeosFenLogins:
     logins: CollisionsList[NeosFenLogin]
-    save_file: str = os.getcwd() + "/savelogins"
+    namespace = "neosFen"
 
     def _write_config(self):
-        with open(self.save_file, 'w') as f:
-            json.dump(self.logins, f, cls=EnhancedJSONEncoder)
+        import base64
+        data = base64.b64encode(json.dumps(self.logins, cls=EnhancedJSONEncoder).encode('utf-8')).decode('utf-8')
+        keyring.set_password(self.namespace, "user_id", data)
 
     def _read_config(self):
-        try:
-            with open(self.save_file) as f:
-                data = json.load(f)
-                return data
-        except FileNotFoundError:
+        data = keyring.get_password(self.namespace, "user_id")
+        if data and data != 'None':
+            data = base64.b64decode(data)
+            return json.loads(data)
+        else:
             return {}
-
-
-    def clean_config(self):
-        os.remove(self.save_file)
 
     def do_login(self, login, password):
         app = MDApp.get_running_app()
-
 
         login_details = {"password": password}
         if "@" in login:
