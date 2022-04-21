@@ -11,3 +11,4 @@ kivymd
 requests
 webcolors
 pyinstaller
+keyring
