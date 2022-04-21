@@ -14,6 +14,8 @@ This application should work on Linux and Windows.
 
 Only a windows build is available here: https://github.com/brodokk/NeosFen/releases
 
+Otherwise for Linux or other usage you can use this commands:
+
 ```
 pip install -r requirements.txt
 python app.py
@@ -21,7 +23,10 @@ python app.py
 
 ## Build an executable for windows
 
+If you still want to build yourself a version of the application use the following commands:
+
 ```
+pip install -r requirements.txt
 python -m PyInstaller .\neosfen.spec
 ```
 
