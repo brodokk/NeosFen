@@ -17,7 +17,7 @@ Only a windows build is available here: https://github.com/brodokk/NeosFen/relea
 Otherwise for Linux or other usage you can use this commands:
 
 ```
-poetry install # or: pip install .
+poetry install
 python app.py
 ```
 
@@ -26,7 +26,7 @@ python app.py
 If you still want to build yourself a version of the application use the following commands:
 
 ```
-poetry install # or: pip install .
+poetry install
 python -m PyInstaller .\neosfen.spec
 ```
 
