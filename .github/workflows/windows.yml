@@ -2,16 +2,22 @@ name: PyInstaller
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches: [develop]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Check out repository
+      uses: actions/checkout@v2
 
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+
+    - name: Install dependencies
+      run: poetry install
+    
     - name: Package Application
       uses: cpainchaud/pyinstaller-action-windows@main
       with:
