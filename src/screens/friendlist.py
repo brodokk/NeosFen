@@ -142,46 +142,46 @@ class FriendsListScreen(MDScreen):
         app = MDApp.get_running_app()
         try:
             friends = app.neosFenClient.getFriends()
+            current_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+            self.ids.last_refresh.text = f"{current_time}"
+            self.ids.connected_contacts.text = f"0 on {len(friends)} online"
+            app.friends = friends
+            online = 0
+            for friend in friends:
+                if self.stopThread:
+                    continue
+                Clock.schedule_once(partial(self.ids.loading_status.hide_widget))
+                try:
+                    username, onlineStatus, sessionName, sessionInfo = self.get_data(friend)
+                    if not app.neosFenFriendsList.friends.contains("id", friend.id):
+                        user = app.neosFenClient.getUserData(friend.id)
+                        if user.profile:
+                            icon = app.neosFenClient.neosDbToHttp(user.profile.iconUrl)
+                        else:
+                            icon = sys._MEIPASS + "/src/ressources/imgs/default_icon.png" if hasattr(sys, '_MEIPASS') else str(pathlib.Path.cwd() / "src/ressources/imgs/default_icon.png")
+                        app.neosFenFriendsList.friends.append(
+                            NeosFenFriend(user.id, icon),
+                            "id",
+                        )
+                    else:
+                        icon = app.neosFenFriendsList.friends.get("id", friend.id).icon
+                        if not icon:
+                            icon = sys._MEIPASS + "/Untitled-1.png" if hasattr(sys, '_MEIPASS') else str(pathlib.Path.cwd() / "Untitled-1.png")
+                    online += 1
+                    self.ids.connected_contacts.text = f"{online} on {len(friends)} online"
+                except TypeError:
+                    continue
+                Clock.schedule_once(partial(self.update_friendslist, username, onlineStatus, sessionName, sessionInfo, friend, icon))
+            self.ids.connected_contacts.text = f"{online} on {len(friends)} online"
+            if self.stopThread:
+                self.ids.connected_contacts.text = f"0 on 0 online"
+                self.clear_widgets()
+            self.runningThread = False
+            self.stopThread = False
         except NeosAPIException as e:
             self.runningThread = False
             self.stopThread = False
             return
-        current_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-        self.ids.last_refresh.text = f"{current_time}"
-        self.ids.connected_contacts.text = f"0 on {len(friends)} online"
-        app.friends = friends
-        online = 0
-        for friend in friends:
-            if self.stopThread:
-                continue
-            Clock.schedule_once(partial(self.ids.loading_status.hide_widget))
-            try:
-                username, onlineStatus, sessionName, sessionInfo = self.get_data(friend)
-                if not app.neosFenFriendsList.friends.contains("id", friend.id):
-                    user = app.neosFenClient.getUserData(friend.id)
-                    if user.profile:
-                        icon = app.neosFenClient.neosDbToHttp(user.profile.iconUrl)
-                    else:
-                        icon = sys._MEIPASS + "/src/ressources/imgs/default_icon.png" if hasattr(sys, '_MEIPASS') else str(pathlib.Path.cwd() / "src/ressources/imgs/default_icon.png")
-                    app.neosFenFriendsList.friends.append(
-                        NeosFenFriend(user.id, icon),
-                        "id",
-                    )
-                else:
-                    icon = app.neosFenFriendsList.friends.get("id", friend.id).icon
-                    if not icon:
-                        icon = sys._MEIPASS + "/Untitled-1.png" if hasattr(sys, '_MEIPASS') else str(pathlib.Path.cwd() / "Untitled-1.png")
-                online += 1
-                self.ids.connected_contacts.text = f"{online} on {len(friends)} online"
-            except TypeError:
-                continue
-            Clock.schedule_once(partial(self.update_friendslist, username, onlineStatus, sessionName, sessionInfo, friend, icon))
-        self.ids.connected_contacts.text = f"{online} on {len(friends)} online"
-        if self.stopThread:
-            self.ids.connected_contacts.text = f"0 on 0 online"
-            self.clear_widgets()
-        self.runningThread = False
-        self.stopThread = False
 
     def on_leave(self):
         print("bye")

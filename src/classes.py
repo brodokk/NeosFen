@@ -93,7 +93,7 @@ class NeosFenLogins:
             self.logins.update("userId", self.neosFenConnectedUser["userId"], "token", "")
         except AttributeError:
             pass
-        self._write_config()
+        self.clean_config()
         app.root.current = 'loginscreen'
 
     def load_config(self):
@@ -142,5 +142,7 @@ class NeosFenClient(client.Client):
         try:
             return client.Client._request(self, verb, path, data, json, params, ignoreUpdate)
         except neos_exceptions.InvalidToken as e:
+            if 'Token expired' not in str(e):
+                raise e
             app = MDApp.get_running_app()
             Clock.schedule_once(partial(app.neosFenLogins.logout))

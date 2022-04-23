@@ -92,6 +92,8 @@ class Client:
             if req.status_code not in [200, 204]:
                 if "Invalid credentials" in req.text:
                     raise neos_exceptions.InvalidCredentials(req.text)
+                elif req.status_code == 403:
+                    raise neos_exceptions.InvalidToken()
                 else:
                     raise neos_exceptions.NeosAPIException(req.status_code, req.text)
             if req.status_code == 200:
