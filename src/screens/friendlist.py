@@ -175,7 +175,7 @@ class FriendsListScreen(MDScreen):
             self.ids.connected_contacts.text = f"{online} on {len(friends)} online"
             if self.stopThread:
                 self.ids.connected_contacts.text = f"0 on 0 online"
-                self.clear_widgets()
+                Clock.schedule_once(partial(self.clear_widgets))
             self.runningThread = False
             self.stopThread = False
         except NeosAPIException as e:
