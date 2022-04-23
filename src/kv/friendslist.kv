@@ -19,11 +19,10 @@
                 halign: "center"
                 font_size: 11
 
-        MDBoxLayout:
-            id: headline_box
+        LoadingCountBoxLayout:
+            id: loading_count
             size_hint_y: None
             height: connected_contacts.texture_size[1]
-            #padding: 0, 0, 0, dp(16)
             padding: dp(10), 0
             pos: dp(16), 0
             md_bg_color: app.theme_cls.primary_color

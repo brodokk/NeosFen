@@ -35,7 +35,7 @@ class CustomThreeLineAvatarListItem(ThreeLineAvatarListItem):
 
 class LoadingBoxLayout(MDBoxLayout):
 
-    def hide_widget(self, dohide=True):
+    def hide_widget(self, dohide=True, *args):
 
         if hasattr(self, 'saved_attrs'):
             if not dohide:
@@ -45,6 +45,17 @@ class LoadingBoxLayout(MDBoxLayout):
             self.saved_attrs = self.height, self.size_hint_y, self.opacity, self.disabled
             self.height, self.size_hint_y, self.opacity, self.disabled = 0, None, 0, True
 
+class LoadingCountBoxLayout(MDBoxLayout):
+
+    def hide_widget(self, dohide=True, *args):
+
+        if hasattr(self, 'saved_attrs'):
+            if not dohide:
+                self.height, self.size_hint_y, self.opacity, self.disabled = self.saved_attrs
+                del self.saved_attrs
+        elif dohide:
+            self.saved_attrs = self.height, self.size_hint_y, self.opacity, self.disabled
+            self.height, self.size_hint_y, self.opacity, self.disabled = 0, None, 0, True
 
 class FriendsListScreen(MDScreen):
 
@@ -147,10 +158,11 @@ class FriendsListScreen(MDScreen):
             self.ids.connected_contacts.text = f"0 on {len(friends)} online"
             app.friends = friends
             online = 0
+            Clock.schedule_once(partial(self.ids.loading_status.hide_widget))
+            Clock.schedule_once(partial(self.ids.loading_count.hide_widget, False))
             for friend in friends:
                 if self.stopThread:
                     continue
-                Clock.schedule_once(partial(self.ids.loading_status.hide_widget))
                 try:
                     username, onlineStatus, sessionName, sessionInfo = self.get_data(friend)
                     if not app.neosFenFriendsList.friends.contains("id", friend.id):
@@ -192,7 +204,7 @@ class FriendsListScreen(MDScreen):
         pass
 
     def clear_widgets(self, *args):
-        self.ids.loading_status.hide_widget()
+        self.ids.loading_count.hide_widget()
         self.ids.friendlist.clear_widgets()
 
     def clear_screen(self, *args):
