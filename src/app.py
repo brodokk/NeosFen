@@ -22,9 +22,9 @@ from screens.login import LoginScreen
 
 Window.size = (400, 600)
 
-# Fix linux shit, maybe
 Config.set('input', 'mouse', 'mouse,disable_multitouch')
 Config.set('kivy', 'log_name', 'kivy_%y-%m-%d_%H-%M-%S_%_.txt')
+#ssConfig.set('kivy','window_icon','src/ressources/imgs/default_icon.png')
 Config.write()
 
 load_kv_files(pathlib.Path('src/kv'))
@@ -41,6 +41,8 @@ class NeosFenApp(MDApp):
     installed_path = os.path.dirname(os.path.realpath(__file__))
 
     def build(self):
+        icon_path = pathlib.Path('src/ressources/imgs/icon.png')
+        self.icon = str(sys._MEIPASS / icon_path) if hasattr(sys, '_MEIPASS') else str(pathlib.Path.cwd() / icon_path)
         self.theme_cls.primary_palette = "Green"
         self.theme_cls.material_style = "M3"
 
