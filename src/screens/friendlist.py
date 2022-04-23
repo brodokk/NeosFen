@@ -11,7 +11,7 @@ from kivy.uix.screenmanager import SlideTransition
 from kivymd.uix.screen import MDScreen
 
 from neos.classes import OnlineStatus
-from neos.exceptions import NeosAPIException
+from neos import exceptions as neos_exceptions
 from kivy.uix.button import Button
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -178,16 +178,28 @@ class FriendsListScreen(MDScreen):
                 Clock.schedule_once(partial(self.clear_widgets))
             self.runningThread = False
             self.stopThread = False
-        except NeosAPIException as e:
+        except neos_exceptions.NeosAPIException:
             self.runningThread = False
             self.stopThread = False
             return
+        except neos_exceptions.InvalidToken:
+            self.runningThread = False
+            self.stopThread = False
+            Clock.schedule_once(partial(self.clear_screen))
+            return
 
     def on_leave(self):
-        print("bye")
+        pass
 
     def clear_widgets(self, *args):
+        self.ids.loading_status.hide_widget()
         self.ids.friendlist.clear_widgets()
+
+    def clear_screen(self, *args):
+        self.clear_widgets()
+        self.manager.transition = SlideTransition(direction="right")
+        self.manager.current = 'loginscreen'
+        self.manager.get_screen('loginscreen').resetForm()
 
     def disconnect(self):
         app = MDApp.get_running_app()
@@ -195,8 +207,5 @@ class FriendsListScreen(MDScreen):
             self.stopThread = True
             while self.runningThread:
                 sleep(1)
-        Clock.schedule_once(partial(self.clear_widgets))
-        self.manager.transition = SlideTransition(direction="right")
-        Clock.schedule_once(partial(app.neosFenLogins.clean_config))
-        self.manager.current = 'loginscreen'
-        self.manager.get_screen('loginscreen').resetForm()
+        app.neosFenLogins.logout()
+        Clock.schedule_once(partial(self.clear_screen))

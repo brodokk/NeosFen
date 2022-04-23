@@ -7,6 +7,7 @@ from urllib.parse import ParseResult, urlparse
 
 import dacite
 from requests import Session
+from requests import exceptions as requests_exceptions
 from dateutil.parser import isoparse
 
 from . import __version__
@@ -97,10 +98,13 @@ class Client:
                 else:
                     raise neos_exceptions.NeosAPIException(req.status_code, req.text)
             if req.status_code == 200:
-                responce = req.json()
-                if "message" in responce:
-                    raise neos_exceptions.NeosAPIException(responce["message"])
-                return responce
+                try:
+                    responce = req.json()
+                    if "message" in responce:
+                        raise neos_exceptions.NeosAPIException(responce["message"])
+                    return responce
+                except requests_exceptions.JSONDecodeError:
+                    return req.text
             # In case of a 204 responce
             return
 
@@ -116,7 +120,8 @@ class Client:
 
     def logout(self) -> None:
         self._request('delete',
-            "/userSessions/{}/{}".format(self.userId, self.token)
+            "/userSessions/{}/{}".format(self.userId, self.token),
+            ignoreUpdate=True,
         )
         self.userId = None
         self.token = None
