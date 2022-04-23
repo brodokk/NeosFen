@@ -12,9 +12,9 @@ from kivy.uix.screenmanager import ScreenManager
 from kivymd.app import MDApp
 
 from neos import exceptions as neos_exceptions
-from neos import classes, client
+from neos import classes
 
-from classes import NeosFenLogins, NeosFenFriendsList
+from classes import NeosFenLogins, NeosFenFriendsList, NeosFenClient
 from utilities import EnhancedJSONEncoder, CollisionsList, load_kv_files
 from screens.friendlist import FriendsListScreen
 from screens.login import LoginScreen
@@ -34,7 +34,7 @@ class NeosFenApp(MDApp):
     neosFenFriendsList = NeosFenFriendsList(CollisionsList())
     neosFenConnectedUser = None
     neosFenFriends = []
-    neosFenClient = client.Client()
+    neosFenClient = NeosFenClient()
     kv_directory = '/kv/'
     installed_path = os.path.dirname(os.path.realpath(__file__))
 

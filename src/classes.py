@@ -5,10 +5,14 @@ import pathlib
 import base64
 from datetime import datetime
 from dataclasses import dataclass
+from typing import Dict
+from functools import partial
 
+from kivy.clock import Clock
 from kivymd.app import MDApp
 
 from neos import exceptions as neos_exceptions
+from neos import client
 from neos.classes import LoginDetails as NeosLoginDetails
 
 from utilities import EnhancedJSONEncoder, CollisionsList
@@ -82,11 +86,13 @@ class NeosFenLogins:
         self._write_config()
         return True
 
-    def logout(self):
+    def logout(self, *args):
         app = MDApp.get_running_app()
-        print(self.logins)
-        self.logins.update("userId", self.neosFenConnectedUser["userId"], "token", "")
-        print(self.logins)
+        app.neosFenClient.logout()
+        try:
+            self.logins.update("userId", self.neosFenConnectedUser["userId"], "token", "")
+        except AttributeError:
+            pass
         self._write_config()
         app.root.current = 'loginscreen'
 
@@ -127,4 +133,14 @@ class NeosFenFriend:
 class NeosFenFriendsList:
     friends: CollisionsList[NeosFenFriend]
 
+class NeosFenClient(client.Client):
 
+    def _request(
+            self, verb: str, path: str, data: dict = None, json: dict = None,
+            params: dict = None, ignoreUpdate: bool = False,
+        ) -> Dict:
+        try:
+            return client.Client._request(self, verb, path, data, json, params, ignoreUpdate)
+        except neos_exceptions.InvalidToken as e:
+            app = MDApp.get_running_app()
+            Clock.schedule_once(partial(app.neosFenLogins.logout))

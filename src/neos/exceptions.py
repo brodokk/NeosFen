@@ -17,3 +17,7 @@ class NoTokenError(NeosException):
 
 class FolderNotFound(NeosException):
     pass
+
+
+class InvalidToken(NeosException):
+    pass

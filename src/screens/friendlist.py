@@ -142,8 +142,7 @@ class FriendsListScreen(MDScreen):
         app = MDApp.get_running_app()
         try:
             friends = app.neosFenClient.getFriends()
-        except NeosAPIException:
-            app.neosFenLogins.logout()
+        except NeosAPIException as e:
             self.runningThread = False
             self.stopThread = False
             return

@@ -41,7 +41,7 @@ AUTHFILE_NAME = "auth.token"
 class Client:
     userId: str = None
     token: str = None
-    expire: datetime = None
+    expire: datetime = None  # This don't seems to be use by the API.
     rememberMe: bool = False
     lastUpdate: datetime = None
     secretMachineId: str = None
@@ -72,11 +72,16 @@ class Client:
         ) -> Dict:
         if self.lastUpdate and not ignoreUpdate:
             lastUpdate = self.lastUpdate
-            #print((datetime.now() - lastUpdate).total_seconds())
-            # implement for on week 3555555:
-            if (datetime.now() - lastUpdate).total_seconds() >= 86000:
-                #print('update time')
+            # From PolyLogix/CloudX.js, the token seems to expire after 3600000 seconds
+            if (datetime.now() - lastUpdate).total_seconds() >= 3600000:
                 self._request('patch', '/userSessions', ignoreUpdate=True)
+            # While the API dont seems to implement more security, official client behavior must be respected.
+            # Only disconnect after 1 day of inactivity for now.
+            # TODO: Implement disconnection after 1 week of inactivity when implementing the rememberMe feature.
+            if 64800 >= (datetime.now() - lastUpdate).total_seconds() >= 85536:
+                self._request('patch', '/userSessions', ignoreUpdate=True)
+            elif (datetime.now() - lastUpdate).total_seconds() >= 86400:
+                raise neos_exceptions.InvalidToken("Token expired")
         args = {'url': CLOUDX_NEOS_API + path}
         if data: args['data'] = data
         if json: args['json'] = json
@@ -84,15 +89,18 @@ class Client:
         func = getattr(self.session, verb, None)
         with func(**args) as req:
             #print("[{}] {}".format(req.status_code, args))
-            if req.status_code != 200:
+            if req.status_code not in [200, 204]:
                 if "Invalid credentials" in req.text:
                     raise neos_exceptions.InvalidCredentials(req.text)
                 else:
                     raise neos_exceptions.NeosAPIException(req.status_code, req.text)
-            responce = req.json()
-            if "message" in responce:
-                raise neos_exceptions.NeosAPIException(responce["message"])
-            return responce
+            if req.status_code == 200:
+                responce = req.json()
+                if "message" in responce:
+                    raise neos_exceptions.NeosAPIException(responce["message"])
+                return responce
+            # In case of a 204 responce
+            return
 
     def login(self, data: LoginDetails) -> None:
         responce = self._request('post', "/userSessions",
@@ -102,6 +110,17 @@ class Client:
         self.secretMachineId = responce["secretMachineId"]
         self.expire = isoparse(responce["expire"])
         self.lastUpdate = datetime.now()
+        self.session.headers.update(self.headers)
+
+    def logout(self) -> None:
+        self._request('delete',
+            "/userSessions/{}/{}".format(self.userId, self.token)
+        )
+        self.userId = None
+        self.token = None
+        self.expire = None
+        self.secretMachineId = None
+        self.lastUpdate = None
         self.session.headers.update(self.headers)
 
     def loadToken(self):
