@@ -3,6 +3,7 @@ import sys
 import pathlib
 
 from kivy.core.window import Window
+from kivy.logger import Logger, LOG_LEVELS
 from kivy.config import Config
 from kivy.resources import resource_add_path
 from kivy.properties import StringProperty
@@ -23,6 +24,7 @@ Window.size = (400, 600)
 
 # Fix linux shit, maybe
 Config.set('input', 'mouse', 'mouse,disable_multitouch')
+Config.set('kivy', 'log_name', 'kivy_%y-%m-%d_%H-%M-%S_%_.txt')
 Config.write()
 
 load_kv_files(pathlib.Path('src/kv'))

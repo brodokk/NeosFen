@@ -1,5 +1,6 @@
 import dataclasses
 import json
+import logging
 from datetime import datetime
 from os import path as OSpath
 from typing import Dict, List
@@ -89,7 +90,7 @@ class Client:
         if params: args['params'] = params
         func = getattr(self.session, verb, None)
         with func(**args) as req:
-            #print("[{}] {}".format(req.status_code, args))
+            logging.debug("NeosAPI: [{}] {}".format(req.status_code, args))
             if req.status_code not in [200, 204]:
                 if "Invalid credentials" in req.text:
                     raise neos_exceptions.InvalidCredentials(req.text)
@@ -136,7 +137,6 @@ class Client:
                 session = json.load(f)
                 expire = datetime.fromisoformat(session["expire"])
                 if datetime.now().timestamp() < expire.timestamp():
-                    print("reading token from disk")
                     self.token = session["token"]
                     self.userId = session["userId"]
                     self.expire = expire

@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Dict
 from functools import partial
 
+from kivy.logger import Logger
 from kivy.clock import Clock
 from kivymd.app import MDApp
 
@@ -62,11 +63,13 @@ class NeosFenLogins:
         try:
             deets = NeosLoginDetails(**login_details)
         except neos_exceptions.NeosException as e:
+            Logger.debug('NeosFenApp: login deets init failed: {}'.format(e))
             app.root.current_screen.ids['error_message'].text = str(e)
             return False
         try:
             app.neosFenClient.login(deets)
-        except Exception as e:
+        except neos_exceptions.NeosException as e:
+            Logger.debug('NeosFenApp: login failed: {}'.format(e))
             app.root.current_screen.ids['error_message'].text = str(e)
             return False
 
@@ -113,7 +116,7 @@ class NeosFenLogins:
             if not session["token"]:
                 return False
             self.neosFenConnectedUser = session
-            print("reading token from disk")
+            Logger.debug("NeosFenApp: reading token from disk")
             app.neosFenClient.lastUpdate = datetime.fromisoformat(session["lastUpdate"])
             app.neosFenClient.token = session["token"]
             app.neosFenClient.userId = session["userId"]
@@ -142,7 +145,9 @@ class NeosFenClient(client.Client):
             return client.Client._request(self, verb, path, data, json, params, ignoreUpdate)
         except neos_exceptions.InvalidToken as e:
             if 'Token expired' not in str(e):
+                Logger.debug("NeosFenApp: token expired")
                 raise e
             app = MDApp.get_running_app()
             app.neosFenLogins.logout()
+            Logger.error("NeosFenApp: {}".format(str(e)))
             raise e
