@@ -91,12 +91,12 @@ class NeosFenLogins:
 
     def logout(self, *args):
         app = MDApp.get_running_app()
-        app.neosFenClient.logout()
         try:
-            self.logins.update("userId", self.neosFenConnectedUser["userId"], "token", "")
+            del self.logins[0]
         except AttributeError:
             pass
         self.clean_config()
+        app.neosFenClient.logout()
 
     def load_config(self):
         app = MDApp.get_running_app()
@@ -141,13 +141,16 @@ class NeosFenClient(client.Client):
             self, verb: str, path: str, data: dict = None, json: dict = None,
             params: dict = None, ignoreUpdate: bool = False,
         ) -> Dict:
+        print(verb)
+        print(path)
+        print(data)
         try:
             return client.Client._request(self, verb, path, data, json, params, ignoreUpdate)
         except neos_exceptions.InvalidToken as e:
-            if 'Token expired' not in str(e):
+            if 'Token expired' in str(e):
+                app = MDApp.get_running_app()
+                app.neosFenClient.clean_session()
                 Logger.debug("NeosFenApp: token expired")
                 raise e
-            app = MDApp.get_running_app()
-            app.neosFenLogins.logout()
             Logger.error("NeosFenApp: {}".format(str(e)))
             raise e
