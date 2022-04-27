@@ -124,11 +124,15 @@ class Client:
             "/userSessions/{}/{}".format(self.userId, self.token),
             ignoreUpdate=True,
         )
+        self.ckean_session()
+
+    def clean_session(self) -> None:
         self.userId = None
         self.token = None
         self.expire = None
         self.secretMachineId = None
         self.lastUpdate = None
+        del self.session.headers["Authorization"]
         self.session.headers.update(self.headers)
 
     def loadToken(self):
