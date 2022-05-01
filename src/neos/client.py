@@ -124,7 +124,7 @@ class Client:
             "/userSessions/{}/{}".format(self.userId, self.token),
             ignoreUpdate=True,
         )
-        self.ckean_session()
+        self.clean_session()
 
     def clean_session(self) -> None:
         self.userId = None
