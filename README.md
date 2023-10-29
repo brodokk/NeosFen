@@ -2,6 +2,9 @@
 
 This application is an experimentation for me to understand the NeosVR API. It have the ability to show your contacts status, online, offline, etc. It also show in which session the contact is present. The functionnality are pretty simple for now.
 
+> [!WARNING]  
+> Depreciation notice for this project. It will be archived and will not support Resonite.
+
 Feel free to use or hack.
 
 Add python neos module by [mralext20](https://github.com/mralext20/neos.py),
